@@ -1,11 +1,45 @@
 <!DOCTYPE html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <html>
     <head>
-        <title>makcro!!!!!!!!</title>
+        <title>makcro</title>
         <meta charset="utf-8" />
+        <style>
+            .original {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                font-family: 'brass mono', 'fira code';
+                font-size: large;
+                outline: none;
+                caret-color: gray;
+                word-wrap: break-word;
+            }
+            #dummy {
+                color: white;
+                word-wrap: break-word;
+            }
+            #board {
+                z-index: 11;
+                background: transparent;
+                color: transparent;
+                word-wrap: break-word;
+            }
+            .original span.highlighted {
+                color: red;
+            }
+        </style>
     </head>
-    <body style="margin: 0%;">
-        <pre id="content" style="white-space: pre-wrap;"></pre>
+    <body style="margin: 0%; background-color: rgb(26, 26, 26);">
+        <div
+            id="board"
+            class="original"
+            contenteditable="true"
+            spellcheck="false"
+            onblur="this.focus()"
+            autofocus
+        ></div>
+        <div id="dummy" class="original"></div>
         <script type="text/javascript">
             let CLIENT_ID =
                 '18830208597-7qaf4bhu75likfndk231vmaul0ckel01.apps.googleusercontent.com'
@@ -37,8 +71,7 @@
                     )
             }
             let appendPre = message => {
-                let textContent = document.createTextNode(message + '\n')
-                document.getElementById('content').appendChild(textContent)
+                console.log(message)
             }
             let uploadFile = () => {
                 gapi.client.drive.files
@@ -76,6 +109,8 @@
                                     file.mimeType ==
                                     'application/vnd.google-apps.folder'
                                 ) {
+                                    if (file.name == 'makcro') {
+                                    }
                                 }
                                 appendPre(file.name + ' (' + file.id + ')')
                             }
@@ -93,4 +128,23 @@
             onreadystatechange="if (this.readyState === 'complete') this.onload()"
         ></script>
     </body>
+    <script>
+        let keyWords = ['select', 'insert', 'update', 'from', 'where']
+        let regexFromMyArray = new RegExp(keyWords.join('|'), 'ig')
+        let u = () => {
+            document.getElementById('dummy').innerHTML = $('#board')
+                .html()
+                .replace(regexFromMyArray, function(str) {
+                    return '<span class="highlighted">' + str + '</span>'
+                })
+        }
+        $('#board').on('input', u)
+        u()
+        let target = $('#dummy')
+        $('#board').scroll(function() {
+            target
+                .prop('scrollTop', this.scrollTop)
+                .prop('scrollLeft', this.scrollLeft)
+        })
+    </script>
 </html>
