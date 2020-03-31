@@ -31,6 +31,10 @@
         </style>
     </head>
     <body style="margin: 0%; background-color: rgb(26, 26, 26);">
+        <div id="upload">
+            <button id="uploadFile" onclick="uploadFile()">Upload File</button>
+            <button>EXAMPLE</button>
+        </div>
         <div
             id="board"
             class="original"
@@ -41,7 +45,77 @@
         ></div>
         <div id="dummy" class="original"></div>
         <script type="text/javascript">
-            let initClient = () => {
+            // either content -> file
+            // or file -> content
+            let patchIdWithContent = id => {
+                fetch(
+                    `https://www.googleapis.com/upload/drive/v3/files/${id}`,
+                    {
+                        method: 'PATCH',
+                        headers: new Headers({
+                            Authorization: `Bearer ${
+                                gapi.client.getToken().access_token
+                            }`,
+                            'Content-Type': 'text/plain'
+                        }),
+                        body: $('#board').text()
+                    }
+                ).then(res => console.log(res))
+            }
+            let uploadFile = () => {
+                gapi.client.drive.files
+                    .list({
+                        pageSize: 10,
+                        fields: 'nextPageToken, files(id, name)'
+                    })
+                    .then(function(response) {
+                        var files = response.result.files
+                        if (files && files.length > 0) {
+                            for (var i = 0; i < files.length; i++) {
+                                var file = files[i]
+                                if (file.name == 'makcro') {
+                                    patchIdWithContent(file.id)
+                                    return
+                                }
+                            }
+                        }
+                        gapi.client.drive.files
+                            .create({
+                                'content-type': 'text/plain',
+                                uploadType: 'multipart',
+                                name: 'makcro',
+                                mimeType: 'text/plain',
+                                fields: 'id, name, kind, size'
+                            })
+                            .then(response1 => {
+                                patchIdWithContent(response1.result.id)
+                            })
+                    })
+            }
+            let keyWords = ['select', 'insert', 'update', 'from', 'where']
+            let regexFromMyArray = new RegExp(keyWords.join('|'), 'ig')
+            let u = () => {
+                document.getElementById('dummy').innerHTML = $('#board')
+                    .html()
+                    .replace(regexFromMyArray, function(str) {
+                        return '<span class="highlighted">' + str + '</span>'
+                    })
+            }
+            $('#board').text('widawido')
+            $('#board').on('input', u)
+            u()
+            let target = $('#dummy')
+            $('#board').scroll(function() {
+                target
+                    .prop('scrollTop', this.scrollTop)
+                    .prop('scrollLeft', this.scrollLeft)
+            })
+        </script>
+        <script
+            async
+            defer
+            src="https://apis.google.com/js/api.js"
+            onload="this.onload=function(){}; gapi.load('client:auth2', () => {
                 gapi.client
                     .init({
                         apiKey: 'AIzaSyAoGzRKCqNlCalMF9nKk9UxGtBNygY8k6M',
@@ -60,80 +134,13 @@
                             ) {
                                 gapi.auth2.getAuthInstance().signIn()
                             }
-                            printDocTitle()
                         },
                         error => {
                             console.log(JSON.stringify(error, null, 2))
                         }
                     )
-            }
-            function printDocTitle() {
-                gapi.client.drive.files.create(
-                    {
-                        resource: {
-                            name: 'makcro'
-                        },
-                        media: {
-                            mimeType: 'application/vnd.google-apps.document',
-                            body: ''
-                        },
-                        fields: 'id'
-                    },
-                    function(err, file) {
-                        if (err) {
-                            // Handle error
-                            console.error(err)
-                        } else {
-                            console.log('File Id: ', file.id)
-                        }
-                    }
-                )
-                gapi.client.docs.documents
-                    .get({
-                        documentId:
-                            '195j9eDD3ccgjQRttHhJPymLJUCOUjs-jmwTrekvdjFE'
-                    })
-                    .then(
-                        function(response) {
-                            var doc = response.result
-                            var title = doc.title
-                            console.log(
-                                'Document "' + title + '" successfully found.'
-                            )
-                        },
-                        function(response) {
-                            console.log(
-                                'Error: ' + response.result.error.message
-                            )
-                        }
-                    )
-            }
-        </script>
-        <script
-            async
-            defer
-            src="https://apis.google.com/js/api.js"
-            onload="this.onload=function(){};gapi.load('client:auth2', initClient)"
+            })"
             onreadystatechange="if (this.readyState === 'complete') this.onload()"
         ></script>
     </body>
-    <script>
-        let keyWords = ['select', 'insert', 'update', 'from', 'where']
-        let regexFromMyArray = new RegExp(keyWords.join('|'), 'ig')
-        let u = () => {
-            document.getElementById('dummy').innerHTML = $('#board')
-                .html()
-                .replace(regexFromMyArray, function(str) {
-                    return '<span class="highlighted">' + str + '</span>'
-                })
-        }
-        $('#board').on('input', u)
-        u()
-        let target = $('#dummy')
-        $('#board').scroll(function() {
-            target
-                .prop('scrollTop', this.scrollTop)
-                .prop('scrollLeft', this.scrollLeft)
-        })
-    </script>
 </html>
