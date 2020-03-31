@@ -41,20 +41,16 @@
         ></div>
         <div id="dummy" class="original"></div>
         <script type="text/javascript">
-            let CLIENT_ID =
-                '18830208597-7qaf4bhu75likfndk231vmaul0ckel01.apps.googleusercontent.com'
-            let API_KEY = 'AIzaSyAoGzRKCqNlCalMF9nKk9UxGtBNygY8k6M'
-            let DISCOVERY_DOCS = [
-                'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
-            ]
-            let SCOPES = 'https://www.googleapis.com/auth/drive'
             let initClient = () => {
                 gapi.client
                     .init({
-                        apiKey: API_KEY,
-                        clientId: CLIENT_ID,
-                        discoveryDocs: DISCOVERY_DOCS,
-                        scope: SCOPES
+                        apiKey: 'AIzaSyAoGzRKCqNlCalMF9nKk9UxGtBNygY8k6M',
+                        clientId:
+                            '18830208597-7qaf4bhu75likfndk231vmaul0ckel01.apps.googleusercontent.com',
+                        discoveryDocs: [
+                            'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
+                        ],
+                        scope: 'https://www.googleapis.com/auth/drive'
                     })
                     .then(
                         () => {
@@ -64,6 +60,7 @@
                                 gapi.auth2.getAuthInstance().signIn()
                             }
                             listFiles()
+                            uploadFile()
                         },
                         error => {
                             appendPre(JSON.stringify(error, null, 2))
@@ -78,7 +75,7 @@
                     .create(
                         {
                             resource: {
-                                name: 'fileName',
+                                name: 'TESTWORKED',
                                 mimeType: 'application/vnd.google-apps.folder'
                             },
                             fields: 'id'
