@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <html>
     <head>
-        <title>makcro</title>
+        <title>dotdex</title>
         <meta charset="utf-8" />
         <style>
             .original {
@@ -16,14 +15,14 @@
                 word-wrap: break-word;
             }
             #dummy {
-                color: white;
                 word-wrap: break-word;
+                color: white;
             }
             #board {
                 z-index: 11;
                 background: transparent;
-                color: transparent;
                 word-wrap: break-word;
+                color: transparent;
             }
             .original span.highlighted {
                 color: red;
@@ -31,10 +30,6 @@
         </style>
     </head>
     <body style="margin: 0%; background-color: rgb(26, 26, 26);">
-        <div id="upload">
-            <button id="uploadFile" onclick="uploadFile()">Upload File</button>
-            <button>EXAMPLE</button>
-        </div>
         <div
             id="board"
             class="original"
@@ -44,102 +39,13 @@
             autofocus
         ></div>
         <div id="dummy" class="original"></div>
-        <script type="text/javascript">
-            // either content -> file
-            // or file -> content
-            let patchIdWithContent = id => {
-                fetch(
-                    `https://www.googleapis.com/upload/drive/v3/files/${id}`,
-                    {
-                        method: 'PATCH',
-                        headers: new Headers({
-                            Authorization: `Bearer ${
-                                gapi.client.getToken().access_token
-                            }`,
-                            'Content-Type': 'text/plain'
-                        }),
-                        body: $('#board').text()
-                    }
-                ).then(res => console.log(res))
-            }
-            let uploadFile = () => {
-                gapi.client.drive.files
-                    .list({
-                        pageSize: 10,
-                        fields: 'nextPageToken, files(id, name)'
-                    })
-                    .then(function(response) {
-                        var files = response.result.files
-                        if (files && files.length > 0) {
-                            for (var i = 0; i < files.length; i++) {
-                                var file = files[i]
-                                if (file.name == 'makcro') {
-                                    patchIdWithContent(file.id)
-                                    return
-                                }
-                            }
-                        }
-                        gapi.client.drive.files
-                            .create({
-                                'content-type': 'text/plain',
-                                uploadType: 'multipart',
-                                name: 'makcro',
-                                mimeType: 'text/plain',
-                                fields: 'id, name, kind, size'
-                            })
-                            .then(response1 => {
-                                patchIdWithContent(response1.result.id)
-                            })
-                    })
-            }
-            let keyWords = ['select', 'insert', 'update', 'from', 'where']
-            let regexFromMyArray = new RegExp(keyWords.join('|'), 'ig')
-            let u = () => {
-                document.getElementById('dummy').innerHTML = $('#board')
-                    .html()
-                    .replace(regexFromMyArray, function(str) {
-                        return '<span class="highlighted">' + str + '</span>'
-                    })
-            }
-            $('#board').text('widawido')
-            $('#board').on('input', u)
-            u()
-            let target = $('#dummy')
-            $('#board').scroll(function() {
-                target
-                    .prop('scrollTop', this.scrollTop)
-                    .prop('scrollLeft', this.scrollLeft)
-            })
-        </script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="main.js"></script>
         <script
             async
             defer
             src="https://apis.google.com/js/api.js"
-            onload="this.onload=function(){}; gapi.load('client:auth2', () => {
-                gapi.client
-                    .init({
-                        apiKey: 'AIzaSyAoGzRKCqNlCalMF9nKk9UxGtBNygY8k6M',
-                        clientId:
-                            '18830208597-7qaf4bhu75likfndk231vmaul0ckel01.apps.googleusercontent.com',
-                        discoveryDocs: [
-                            'https://docs.googleapis.com/$discovery/rest?version=v1',
-                            'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
-                        ],
-                        scope: 'https://www.googleapis.com/auth/drive'
-                    })
-                    .then(
-                        () => {
-                            if (
-                                !gapi.auth2.getAuthInstance().isSignedIn.get()
-                            ) {
-                                gapi.auth2.getAuthInstance().signIn()
-                            }
-                        },
-                        error => {
-                            console.log(JSON.stringify(error, null, 2))
-                        }
-                    )
-            })"
+            onload="this.onload=function(){};handleClientLoad()"
             onreadystatechange="if (this.readyState === 'complete') this.onload()"
         ></script>
     </body>
