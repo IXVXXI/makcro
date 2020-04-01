@@ -69,7 +69,7 @@ let initClient = () => {
             scope: 'https://www.googleapis.com/auth/drive.metadata.readonly'
         })
         .then(() => {
-            ensureId()
+            // ensureId()
         })
 }
 let handleClientLoad = () => {
